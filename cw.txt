@@ -1,0 +1,66 @@
+const minimist  = require('minimist')
+const fs = require('fs')
+function readNotes(){
+    let inputFile = fs.readFileSync('notes.json').toString()
+    let notes =JSON.parse(inputFile)
+    return notes
+}
+function writeNotes(notes){
+    let JSONstr =JSON.stringify(notes)
+    fs.writeFileSync('notes.json',JSONstr)
+}
+function addNotes(args){
+    let notes = readNotes()
+    let note  = {}
+    note.title = args.title
+    note.body = args.body                                       
+    notes.push(note)
+    console.log(notes)
+    writeNotes(notes)
+}
+function editNotes(){
+    let notes = readNotes()
+    let note  = {}
+    for (let i = 0; i < notes.length; i++){                     //If the notes 
+current index title matches args title, change the body and write to file
+        if (notes[i].title === args.title){
+            notes[i].body = args.body
+        }
+        writeNotes(notes)
+    }
+    console.log(notes)
+}
+function viewNotes(args){
+    let notes = readNotes()
+    let note  = {}
+    for (let i = 0; i <notes.length; i++){                      //Display notes at 
+index
+        console.log(notes[i])
+    }
+}
+function deleteNotes(){
+let notes = readNotes()
+let note = {}
+ for (let i = 0; i<notes.length; i++){
+     if(notes[i].title === args.title){             //Cycle through array to match 
+title, when matches delete the current index and write to notes
+        notes.splice(i,1)
+        writeNotes(notes)
+        console.log(notes)
+     }
+ }
+}
+let args = minimist(process.argv.slice(2),{})
+if('add' in args){
+    addNotes(args)                    //Check for correct commands in terminal, 
+otherwise output error
+} else if ('edit' in args){
+    editNotes(args)
+} else if ('view' in args){
+    viewNotes(args)
+} else if ('delete' in args){
+    deleteNotes(args)
+}
+else{
+    console.log("invalid command")
+}

@@ -1,0 +1,70 @@
+const request = require("request")
+const minimist = require("minimist")
+const fs = require('fs')
+const food = minimist(process.argv.slice(2))
+//console.log(food)
+//console.log(food._)
+let foodName = " "
+//console.log(+foodName)
+for (item of food._) {          //Combining elements of food names from array of 
+object
+    foodName += item + " "
+    //console.log(foodName)
+}
+function getRecipe(foodName,cb){
+    const foodPrefix = 'https://api.edamam.com/api/recipes/v2?type=public&q='
+    const foodID = '67d5b722'
+    const foodKey = '0039d4a44c0de3d66125a2c4b8331c00'
+    const url = foodPrefix+foodName+'&app_id='+foodID+'&app_key='+foodKey
+    request({url: url},(error,response)=>{
+        if(error){
+            cb('There is a service error', undefined)      //Network error
+        } else {
+            const data = JSON.parse(response.body)
+            if (data.hits[0] === undefined){        //checks if entry is valid
+                cb('Invalid entry', undefined)
+            } else {
+                const foodname = data.hits[0].recipe.label       //pull name
+                const calorie = data.hits[0].recipe.calories    //pull calories
+                // console.log("Ingredients")
+                // console.log("-----------------------")
+                const food = data.hits[0].recipe.ingredientLines    //pull 
+ingredients
+                cb(undefined, {foodname: foodname, calorie: calorie, ingredient: 
+food})
+            }   
+            }
+              
+    })
+}
+getRecipe(foodName, (error,response)=>{         //callback function
+    if (error){
+        console.log(error)      //display error
+    } else {
+        if (food.save === true){        //if user put save
+            const foodName = "Recipe Name : " + response.foodname + "\n"
+            const calories = "Calories : " + response.calorie + " kcals" +"\n"
+            let recipe = ""
+            for (item of response.ingredient){      //add all ingredients
+                recipe += item + '\n'
+            }
+            const ingredient = "Ingredients\n-------------------\n" + recipe
+            const recipeFile = foodName + calories + ingredient
+            fs.writeFileSync('recipe.txt', recipeFile)      //write to file
+            console.log('Saved recipe to file')
+        } else if (food.view === true) {            //viewing
+            const foodName = "Recipe Name : " + response.foodname + "\n"
+            const calories = "Calories : " + response.calorie + " kcals" + "\n"
+            let recipe = ""
+            for (item of response.ingredient){      //add all ingredients
+                recipe += item + '\n'
+            }
+            const ingredient = "Ingredients\n-------------------\n" + recipe
+            const recipeFile = foodName + calories + ingredient         //final 
+output
+            console.log(recipeFile)
+        } else {
+            console.log('Please add --save or --view')
+        }
+    }
+})

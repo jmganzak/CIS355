@@ -1,0 +1,235 @@
+const fs = require('fs')
+const minimist = require('minimist')
+const { Table } = require ('console-table-printer')
+function readUsers(){ //read in users
+    let inputFile = fs.readFileSync('users.json')
+    if (inputFile.length===0){
+        fs.writeFileSync('users.json',JSON.stringify([],null,2))
+        inputFile = fs.readFileSync('users.json')
+    }
+    let users =JSON.parse(inputFile)
+    return users
+}
+function readTran(){ //read transactions
+    if (fs.existsSync('transactions.json')===false){        //check if file exists
+        const arr = []
+        fs.writeFileSync('transactions.json',JSON.stringify(arr,null,2))        
+//split array
+    }
+    let inputFile = fs.readFileSync('transactions.json')
+    let transactions =JSON.parse(inputFile)
+    return transactions
+}
+function writeUsers(users){     //write to users
+    
+    let JSONstr =JSON.stringify(users,null,2)
+    fs.writeFileSync('users.json',JSONstr)
+}
+function addUser(username,name,balance){        //handles adding users to users 
+file.
+    let users = readUsers()
+    let user  = {}
+    let temp = false
+    user.name = name
+    for (let i = 0; i<users.length; i++){           //checks if username exists
+        if(users[i].username === username){                                   
+           console.log("This username is already taken. Please choose a different 
+one")
+            temp = true
+        } else {
+            temp = false
+        }  
+    }
+    if (temp === false) {                           
+        user.username = username
+    if (balance === undefined){         //default balance check
+        balance = 100
+    }
+    user.balance = balance
+    user.items = []                       
+    users.push(user)
+    console.log(users)
+    writeUsers(users)
+    }
+    
+}
+function deleteUsers(username){         ///remove users
+   
+let users = readUsers()
+let user = {}
+ for (let i = 0; i<users.length; i++){              //finds matching id in json and
+removes
+     if(users[i].username === username){             
+        users.splice(i,1)                                   
+        writeUsers(users)
+       
+     }
+     else
+     console.log("User does not exist")
+     
+ }
+}  
+function addItems(username,itemname,itemprice){         //add items
+    
+    let users = readUsers()
+    let user = {}
+    let item = {}
+        user.item = itemname
+        user.id = Math.floor(Math.random() * 101)
+        user.username = username
+        user.price = itemprice  
+        item.name =user.item                   //random id for items
+        item.price =user.price
+        item.id = user.id                           
+                                             
+                                           
+        for (let i = 0; i<users.length; i++){                   
+            if(users[i].username === username){            //check index to users 
+input    
+                users[i].items.push(item)       //if they match, push item
+            }
+        }
+        console.log(users)
+        writeUsers(users)
+    }
+function buyItem(username, itemid){         //buy function
+    
+    let users = readUsers()
+    let user = {}
+    let buyerid = -1              //counter, -1 means does not exist
+    for (let i = 0; i<users.length; i++){
+        if(users[i].username === username){ 
+            buyerid = i 
+                                                    //Check if username exists     
+           
+        }
+    }
+    if (buyerid === -1){
+        console.log("Buyer doesnt exist")
+        return
+    }
+    for (let i = 0; i < users[buyerid].items.length;i++){               //Check if 
+buyer owns item 
+        if (users[buyerid].items[i].id === itemid){
+            console.log("You already owns item!")
+            return
+        }
+    }
+    let sellerid = -1               //ids for item and seller
+    let itemindex = -1
+    for (let i = 0; i < users.length;i++){
+        for (let j = 0; j < users[i].items.length;j++){                 
+//validation
+            if (users[i].items[j].id === itemid){
+                sellerid = i
+                itemindex = j
+                //console.log("Valid")
+            }
+        }
+    }
+    if (sellerid === -1){
+        console.log("Item does not exist!")                  //validation
+        return
+    }
+    if (users[buyerid].balance < users[sellerid].items[itemindex].price){          
+                                                                            //check
+balance
+        console.log("Insufficient funds!")
+        return
+    }
+    console.log("Transaction Sucessfull! Thanks for your order!")
+    users[buyerid].balance -= users[sellerid].items[itemindex].price            
+//subtracting      
+                            
+    users[sellerid].balance += users[sellerid].items[itemindex].price           
+//adding
+                        
+    users[buyerid].items.push(users[sellerid].items[itemindex])         //adding 
+item to buyer        
+    users[sellerid].items.splice(itemindex,1)                                   
+//remove item from seller
+    console.log(users)
+    writeUsers(users)
+}
+function viewUsers(){       //view function
+   
+    const userstable = new Table({
+        columns: [
+          { name: "user_name", alignment: "left"}, 
+          { name: "name", alignment: "left" },
+          { name: "balance", alignment:"left" },
+          { name: "Items for Sale",alignment:"right"}
+        ]
+      })  
+     let users = readUsers()
+     for(i of users){
+        userstable.addRow({user_name: i.username, name: i.name, balance: "$"+ 
+i.balance, "Items for Sale": i.items.length})       //add username, bal, name items
+columns
+     }
+     console.log("--User Log--")
+     userstable.printTable()
+}
+function viewProducts(){            //viewing products
+    const product = new Table({
+        columns: [
+          { name: "id", alignment: "left"}, 
+          { name: "name", alignment: "left" },
+          { name: "seller", alignment:"left" },
+          { name: "price",alignment:"right"}
+        ]
+      })  
+     let users = readUsers()
+     for(i of users){
+        for (j of i.items){
+            product.addRow({id: j.id, name: j.name, seller: i.username, price: "$" 
++ j.price})       //id, name, seller, price columns
+        }
+     }
+     console.log("--Product Log--")
+     product.printTable()
+}
+function viewTransactions(){ //shows purchases
+    const view = new Table({
+        columns: [
+          { name: "Item ID", alignment: "left"}, 
+          { name: "seller", alignment: "left" },
+          { name: "buyer", alignment:"left" },      //columns for table
+          { name: "price",alignment:"left"},
+          { name: "date",alignment:"left"}
+        ]
+      })  
+     let transactions = readTran()
+     for(i of transactions){
+        view.addRow({"Item ID": i.itemid, seller: i.seller, buyer: i.buyer, price: 
+i.price, date: i.date})       //add username ,name ,balance ,items
+     }
+     console.log("--Transaction Log--")
+     view.printTable()
+}    
+//commands
+let args = minimist(process.argv.slice(2),{})
+if('addUser' in args){
+    addUser(args.username,args.name,args.balance)                    
+} else if ('addItem' in args){
+    addItems(args.owner,args.name,args.price)
+}else if ('buy' in args){ 
+    let data = readTran()       //getting transactions
+    const file = {}     //new object
+    file.itemid = args.itemid
+    let users = readUsers()     //reading in users
+    let test
+    let price
+    for (i of users){       //loops through users
+        for (j of i.items){         //loop through items
+            if (j.id === args.itemid){          //if id matches args id
+                test = i.username               //set name and price
+               price = j.price
+            }
+        }
+    }
+     
+    file.seller = test
+    file.buyer = args.buyer
+    file.price = price          //setting variables
+    file.date = Dat

@@ -1,0 +1,27 @@
+const geoip = require("geoip-lite")
+const fs = require("fs")
+let end = []     //final array
+let final = {}      //objects for countries
+let location
+let country = fs.readFileSync("ip.txt").toString()     //Read in file
+//console.log(country)
+let arr = country.split("\r\n")         //split array
+//console.log(arr)
+arr.forEach(item => {
+    location = geoip.lookup(item)           //find item
+    let exist = end.find(exists=> exists.country === location.country) //check if 
+country exists already
+    if(exist){          //Check if object exists
+        exist['count']+=1           //If so add 1 to count
+    }
+    else{           //If object doesnt exist
+        
+        final['country']= location.country      //Add country
+        final['count'] = 1                      //set count to one
+        
+        let finalCopy = {...final}      //make shallow copy of final
+        end.push(finalCopy)                 //push to array
+    }
+})
+end = end.sort((a,b)=> a.count-b.count) //sort array by count
+console.log(end) 

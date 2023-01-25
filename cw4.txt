@@ -1,0 +1,141 @@
+const mongoose = require('mongoose')
+const Schema = mongoose.Schema;
+const citySchema = new mongoose.Schema({ 
+    _id: { type: 'string' },
+    city: { type: 'string' },
+    zip: { type: 'string' },
+    loc: { type: 'array', items:[Object]},
+    pop: { type: 'number' },
+    state: { type: 'string' }},
+    { collection : 'zips'});
+const Zip = mongoose.model('Zip', citySchema);
+//copy the connection string for your mongodb cluster.
+const url = 
+'mongodb+srv://jmganzak:jmganzak@cluster0.gyabs.mongodb.net/sample_training?
+retryWrites=true&w=majority'
+mongoose.connect(url,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+/* gets all cities, comment this out, once you have verified this is working */
+//Zip.find({},(error,result)=>{
+ //   if (error)
+   //     console.log(error)
+   // else{
+   //     console.log(result)
+   // }
+//})
+// Write a separate query for each question. Your code should have a total of 10 
+queries
+Zip.find({city:"SAGINAW"},(error,result)=>{     //Question 1 - Find cities with 
+name SAGINAW
+    if (error)
+        console.log(error)
+    else{
+        console.log("-------------------------Q1-------------------------")
+        console.log(result.toString())
+    }
+})
+Zip.find({pop:{$gte:100000}},(error,result)=>{      //Question 2 - Pop > 100000
+    if (error)
+        console.log(error)
+    else{
+        console.log("-------------------------Q2-------------------------")
+        console.log(result.toString())
+    }
+})
+Zip.findOne({city:"WHITEFISH", state:"MT"},(error,result)=>{        //Question 3  -
+Pop of MT Whitefish
+    if (error)
+        console.log(error)
+    else{
+        console.log("-------------------------Q3-------------------------")
+        console.log(result.pop)
+    }
+})
+Zip.findOne({city:"FRANKENMUTH", state:"MI"},(error,result)=>{ //Question 4  - Zip 
+of Frankenmuth MI
+    if (error)
+        console.log(error)
+    else{
+        console.log("-------------------------Q4-------------------------")
+        console.log(result.zip)
+    }
+})
+Zip.findOne({zip:"01701"},(error,result)=>{     //Question 5 - Zip code of 01701   
+    if (error)
+        console.log(error)
+    else{
+        console.log("-------------------------Q5-------------------------")
+        console.log(result.state)
+    }
+})
+Zip.find({city:{$regex: "TOWN"}},(error,result)=>{      //Question 6 - Town in Name
+    let cities = 0
+    if (error)
+        console.log(error)
+    else{
+        for (i=0; i <result.length; i++){
+            cities = cities + 1
+        }
+        console.log("-------------------------Q6-------------------------")
+        console.log(cities)
+        
+    }
+})
+Zip.find({city:{$regex: "TOWN"}, pop:{$gte:10000, $lte:20000}},(error,result)=>{   
+//Question 7 - Town in name and pop between 10k to 20k
+    let cities = 0
+    if (error)
+        console.log(error)
+    else{
+        for (i=0; i <result.length; i++){
+            cities = cities + 1
+        }
+        console.log("-------------------------Q7-------------------------")
+        console.log(cities)
+        
+    }
+})
+Zip.find({$or: [                    //Question 8  - Start with letter Z or pop < 50
+    {pop : {$lt: 50}},{city: /^Z/}]},(error,result)=>{
+    let cities = 0
+    if (error)
+        console.log(error)
+    else{
+        for (i=0; i <result.length; i++){
+            cities = cities + 1
+        }
+        console.log("-------------------------Q8-------------------------")
+        console.log(cities)
+        
+    }
+})
+Zip.find({$or: [ {state: "SC"},{state: "NC"}]},(error,result)=>{            
+//Question 9  -  Total cities in NC/SC
+    let cities = 0
+    if (error)
+        console.log(error)
+    else{
+        for (i=0; i <result.length; i++){
+            cities = cities + 1
+        }
+        console.log("-------------------------Q9-------------------------")
+        console.log(cities)
+        
+    }
+})
+Zip.find({state: "MI"},(error,result)=>{            //Question 10  - Pop of 
+Michigan
+    let cities = 0
+    if (error)
+        console.log(error)
+    else{
+        for (i=0; i <result.length; i++){
+            cities = cities + result[i].pop
+        }
+        console.log("-------------------------Q10-------------------------")
+        console.log(cities)
+        
+    }
+})

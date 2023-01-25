@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('partials/meta') %>
+<body class="d-flex flex-column min-vh-100" >
+<%- include('partials/header') %>
+    <h1></h1>
+    <div class="card" style="width: 18rem; margin-top: 2.5rem;">
+        <img src="<%= locals.food.strMealThumb %>" class="card-img-top" alt="...">
+        <div class="card-body">
+            <% let dollars  %>     
+          <%  if(locals.food.price <= 10){ %>
+        <%        dollars = "$" %>
+     <%       } else if (locals.food.price >= 10 &&  locals.food.price<= 20) { %>
+        <%            dollars = "$$" %>
+      <%      } else { %>
+       <%         dollars = "$$$"       %>
+      <%      } %>
+          <h5 class="card-title"><%= locals.food.strMeal  %> <%=dollars%></h5>
+          <%let arr = locals.food.strInstructions %>
+        <% let inst = arr.split(".")%>
+        <!-- <%console.log(inst)%> -->
+        <ol>
+        <%for (item of inst){  %>
+         <li> <%= item %> </li> 
+        <% } %>
+
+          </ol>
+          <a href="#" class="btn btn-warning col-12">Add to Cart ( $<%= locals.food.price %>)</a>
+        </div>
+      </div>
+ <%- include('partials/footer') %>
+</body>
+</html>
